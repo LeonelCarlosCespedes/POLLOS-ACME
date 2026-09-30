@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS - Pollos Acme 🐔</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pos.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>🐔 Pollos Acme - Punto de Venta</h1>
+    </header>
+
+    <main class="pos-layout">
+        <section id="menu-container" class="menu-seccion">
+            <h2>Cargando menú...</h2>
+        </section>
+
+        <aside class="ticket-seccion">
+            <h2> Ticket de Venta</h2>
+            <div id="carrito-items" class="carrito-items">
+                <p style="color:#888; text-align:center;">El carrito está vacío</p>
+            </div>
+            <div class="ticket-total">
+                <span>Total:</span>
+                <span id="total-venta">Bs. 0.00</span>
+            </div>
+            <button class="btn-cobrar" onclick="procesarVenta()">💰 COBRAR</button>
+            <button class="btn-limpiar" onclick="limpiarCarrito()">🗑️ Limpiar</button>
+        </aside>
+    </main>
+
+    <!-- Modal de Cobro -->
+    <div id="modal-cobro" class="modal-overlay" style="display: none;">
+        <div class="modal-contenido">
+            <h2>💰 Procesar Pago</h2>
+            <div class="resumen-pago">
+                <p>Total a cobrar:</p>
+                <strong id="modal-total">Bs. 0.00</strong>
+            </div>
+            <div class="form-pago">
+                <label for="metodo-pago">Método de Pago:</label>
+                <select id="metodo-pago">
+                    <option value="Efectivo"> Efectivo</option>
+                    <option value="Tarjeta">💳 Tarjeta</option>
+                    <option value="QR">📱 QR (Pago Móvil)</option>
+                    <option value="Transferencia">🏦 Transferencia</option>
+                </select>
+
+                <label for="tipo-pedido">Tipo de Pedido:</label>
+                <select id="tipo-pedido">
+                    <option value="Local">🍽️ Local</option>
+                    <option value="Para llevar"> Para llevar</option>
+                    <option value="Delivery">🛵 Delivery</option>
+                </select>
+            </div>
+            <div class="modal-botones">
+                <button class="btn-confirmar" onclick="confirmarVenta()">✅ Confirmar Venta</button>
+                <button class="btn-cancelar" onclick="cerrarModal()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/pos.js"></script>
+</body>
+
+</html>

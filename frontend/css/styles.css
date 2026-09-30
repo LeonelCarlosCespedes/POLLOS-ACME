@@ -1,0 +1,323 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f4f9;
+    min-height: 100vh;
+}
+
+header {
+    background: #d32f2f;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 28px;
+}
+
+/* Layout principal: 2 columnas */
+.pos-layout {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    height: calc(100vh - 80px);
+}
+
+/* Sección del menú (izquierda) */
+.menu-seccion {
+    flex: 2.5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-content: flex-start;
+    overflow-y: auto;
+}
+
+.producto-tarjeta {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    width: 180px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.producto-tarjeta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.producto-tarjeta h3 {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    color: #333;
+    min-height: 40px;
+}
+
+.categoria {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.precio {
+    font-size: 20px;
+    font-weight: bold;
+    color: #d32f2f;
+    margin: 10px 0;
+}
+
+.producto-tarjeta button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.producto-tarjeta button:hover {
+    background: #45a049;
+}
+
+/* Sección del ticket (derecha) */
+.ticket-seccion {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+}
+
+.ticket-seccion h2 {
+    border-bottom: 2px solid #d32f2f;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.carrito-items {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.carrito-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.item-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.item-precio {
+    color: #888;
+    font-size: 13px;
+}
+
+.item-controles {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.btn-cantidad {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.btn-cantidad:hover {
+    background: #b71c1c;
+}
+
+.item-cantidad {
+    font-weight: bold;
+    min-width: 25px;
+    text-align: center;
+}
+
+.btn-eliminar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: auto;
+}
+
+.item-subtotal {
+    text-align: right;
+    font-weight: bold;
+    color: #d32f2f;
+    font-size: 15px;
+}
+
+.ticket-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 15px 0;
+    border-top: 2px solid #333;
+    margin-bottom: 15px;
+}
+
+.btn-cobrar {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+
+.btn-cobrar:hover {
+    background: #45a049;
+}
+
+.btn-limpiar {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-limpiar:hover {
+    background: #d32f2f;
+}
+
+/* Modal de Cobro */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-contenido {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-contenido h2 {
+    color: #d32f2f;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.resumen-pago {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.resumen-pago strong {
+    color: #d32f2f;
+    font-size: 24px;
+}
+
+.form-pago {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-pago label {
+    font-weight: bold;
+    color: #333;
+}
+
+.form-pago select {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.modal-botones {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-confirmar {
+    flex: 1;
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-confirmar:hover {
+    background: #45a049;
+}
+
+.btn-cancelar {
+    flex: 1;
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-cancelar:hover {
+    background: #d32f2f;
+}

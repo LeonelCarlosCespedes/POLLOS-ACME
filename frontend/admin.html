@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pollos Acme 🐔</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        /* Botón cerrar sesión en header */
+        .btn-cerrar-sesion {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background: #c0392b;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-contenido {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-contenido h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d32f2f;
+        }
+
+        .preview-imagen {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+
+        .preview-imagen img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-botones button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .btn-guardar {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-guardar:hover {
+            background: #45a049;
+        }
+
+        .btn-cancelar {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-cancelar:hover {
+            background: #d32f2f;
+        }
+
+        .imagen-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .imagen-input-container input[type="file"] {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <h2> Pollos Acme</h2>
+            <ul>
+                <li class="active" onclick="cargarSeccion('productos', this)"> Productos</li>
+                <li onclick="cargarSeccion('usuarios', this)">👥 Usuarios</li>
+                <li onclick="cargarSeccion('clientes', this)">👤 Clientes</li>
+                <li onclick="cargarSeccion('reportes', this)">📈 Reportes</li>
+            </ul>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <main class="admin-content">
+            <div class="admin-header">
+                <h1 id="titulo-seccion">🍗 Gestión de Productos</h1>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span id="nombre-usuario">Bienvenido</span>
+                    <button class="btn-cerrar-sesion" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <!-- Sección de Productos -->
+            <div id="seccion-productos">
+                <div class="data-table">
+                    <div class="data-table-header">
+                        <h2>Lista de Productos</h2>
+                        <button class="btn-add" onclick="abrirModalAgregar()">➕ Agregar Producto</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-productos">
+                            <tr>
+                                <td colspan="7" style="text-align:center;">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Otras secciones (placeholder) -->
+            <div id="seccion-usuarios" style="display:none;">
+                <div class="data-table">
+                    <div class="data-table-header">
+                        <h2>Lista de Usuarios</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios">
+                            <tr>
+                                <td colspan="5" style="text-align:center;">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="seccion-clientes" style="display:none;">
+                <div class="data-table">
+                    <div class="data-table-header">
+                        <h2>Lista de Clientes</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Documento</th>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-clientes">
+                            <tr>
+                                <td colspan="5" style="text-align:center;">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="seccion-reportes" style="display:none;">
+                <p style="text-align:center; padding:40px;">
+                    <a href="reportes.html" style="color:#d32f2f; font-size:18px;">📈 Ir a Reportes</a>
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Agregar/Editar Producto -->
+    <div id="modal-producto" class="modal-overlay">
+        <div class="modal-contenido">
+            <h2 id="modal-titulo">➕ Agregar Producto</h2>
+
+            <input type="hidden" id="prod-id">
+
+            <div class="form-group">
+                <label>Nombre del producto:</label>
+                <input type="text" id="prod-nombre" placeholder="Ej: 1/4 Pollo + Papas">
+            </div>
+
+            <div class="form-group">
+                <label>Categoría:</label>
+                <select id="prod-categoria">
+                    <option value="1">Pollos a la Brasa</option>
+                    <option value="2">Combos</option>
+                    <option value="3">Bebidas</option>
+                    <option value="4">Extras</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción:</label>
+                <textarea id="prod-descripcion" rows="2" placeholder="Descripción del producto"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Precio (Bs.):</label>
+                <input type="number" id="prod-precio" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="form-group">
+                <label>Tipo:</label>
+                <select id="prod-tipo">
+                    <option value="Simple">Simple</option>
+                    <option value="Combo">Combo</option>
+                    <option value="Extra">Extra</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Imagen del producto:</label>
+                <div class="imagen-input-container">
+                    <input type="file" id="prod-imagen" accept="image/*" onchange="previewImagen(event)">
+                </div>
+                <div class="preview-imagen" id="preview-imagen">
+                    <span>Sin imagen</span>
+                </div>
+                <small style="color:#888;">Deja vacío para mantener la imagen actual (al editar)</small>
+            </div>
+
+            <div class="modal-botones">
+                <button class="btn-guardar" onclick="guardarProducto()"> Guardar</button>
+                <button class="btn-cancelar" onclick="cerrarModalProducto()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const API_BASE = "http://localhost/pollos_acme/api/";
+        let imagenRuta = null;
+        let productoEditando = null;
+
+        // Verificar sesión al cargar
+        document.addEventListener("DOMContentLoaded", function () {
+            const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+            if (!usuario) {
+                alert("Debes iniciar sesión primero.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("nombre-usuario").textContent = "👤 " + usuario.nombre;
+            cargarProductos();
+        });
+
+        // Cambiar entre secciones
+        function cargarSeccion(seccion, elemento) {
+            // Ocultar todas las secciones
+            document.getElementById("seccion-productos").style.display = "none";
+            document.getElementById("seccion-usuarios").style.display = "none";
+            document.getElementById("seccion-clientes").style.display = "none";
+            document.getElementById("seccion-reportes").style.display = "none";
+
+            // Mostrar la sección seleccionada
+            document.getElementById("seccion-" + seccion).style.display = "block";
+
+            // Actualizar menú activo
+            document.querySelectorAll(".admin-sidebar li").forEach(li => li.classList.remove("active"));
+            if (elemento) elemento.classList.add("active");
+
+            // Actualizar título
+            const titulos = {
+                productos: "🍗 Gestión de Productos",
+                usuarios: "👥 Gestión de Usuarios",
+                clientes: "👤 Gestión de Clientes",
+                reportes: "📈 Reportes"
+            };
+            document.getElementById("titulo-seccion").textContent = titulos[seccion] || "";
+
+            // Cargar datos según la sección
+            if (seccion === "productos") cargarProductos();
+            if (seccion === "usuarios") cargarUsuarios();
+            if (seccion === "clientes") cargarClientes();
+            if (seccion === "reportes") window.location.href = "reportes.html";
+        }
+
+        // Cargar productos
+        async function cargarProductos() {
+            const productos = await obtenerDatos("productos_admin.php");
+            const tbody = document.getElementById("tabla-productos");
+
+            if (productos && productos.data && productos.data.length > 0) {
+                tbody.innerHTML = productos.data.map(p => {
+                    const imagenSrc = p.imagen
+                        ? "../" + p.imagen
+                        : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23d32f2f' width='60' height='60'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='30'%3E🐔%3C/text%3E%3C/svg%3E";
+
+                    return `
+                        <tr>
+                            <td>${p.id_producto}</td>
+                            <td><img src="${imagenSrc}" style="width:50px; height:50px; object-fit:cover; border-radius:6px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'%3E%3Crect fill=\'%23d32f2f\' width=\'60\' height=\'60\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'30\'%3E%3C/text%3E%3C/svg%3E'"></td>
+                            <td>${p.nombre}</td>
+                            <td>${p.categoria || '-'}</td>
+                            <td>Bs. ${parseFloat(p.precio).toFixed(2)}</td>
+                            <td>${p.tipo}</td>
+                            <td>
+                                <button class="btn-action btn-edit" onclick='abrirModalEditar(${JSON.stringify(p).replace(/'/g, "\\'")})'>Editar</button>
+                                <button class="btn-action btn-delete" onclick="eliminarProducto(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}')">Eliminar</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay productos</td></tr>';
+            }
+        }
+
+        // Abrir modal para agregar
+        function abrirModalAgregar() {
+            productoEditando = null;
+            imagenRuta = null;
+
+            document.getElementById("modal-titulo").textContent = "➕ Agregar Producto";
+            document.getElementById("prod-id").value = "";
+            document.getElementById("prod-nombre").value = "";
+            document.getElementById("prod-categoria").value = "1";
+            document.getElementById("prod-descripcion").value = "";
+            document.getElementById("prod-precio").value = "";
+            document.getElementById("prod-tipo").value = "Simple";
+            document.getElementById("prod-imagen").value = "";
+            document.getElementById("preview-imagen").innerHTML = '<span>Sin imagen</span>';
+
+            document.getElementById("modal-producto").classList.add("active");
+        }
+
+        // Abrir modal para editar
+        function abrirModalEditar(producto) {
+            productoEditando = producto;
+            imagenRuta = producto.imagen || null;
+
+            document.getElementById("modal-titulo").textContent = "️ Editar Producto";
+            document.getElementById("prod-id").value = producto.id_producto;
+            document.getElementById("prod-nombre").value = producto.nombre;
+            document.getElementById("prod-categoria").value = producto.id_categoria;
+            document.getElementById("prod-descripcion").value = producto.descripcion || "";
+            document.getElementById("prod-precio").value = producto.precio;
+            document.getElementById("prod-tipo").value = producto.tipo;
+            document.getElementById("prod-imagen").value = "";
+
+            if (producto.imagen) {
+                document.getElementById("preview-imagen").innerHTML = `<img src="../${producto.imagen}" alt="Preview">`;
+            } else {
+                document.getElementById("preview-imagen").innerHTML = '<span>Sin imagen</span>';
+            }
+
+            document.getElementById("modal-producto").classList.add("active");
+        }
+
+        // Cerrar modal
+        function cerrarModalProducto() {
+            document.getElementById("modal-producto").classList.remove("active");
+            productoEditando = null;
+            imagenRuta = null;
+        }
+
+        // Preview de imagen
+        function previewImagen(event) {
+            const archivo = event.target.files[0];
+            const preview = document.getElementById("preview-imagen");
+
+            if (archivo) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(archivo);
+            }
+        }
+
+        // Guardar producto (crear o editar)
+        async function guardarProducto() {
+            const id = document.getElementById("prod-id").value;
+            const nombre = document.getElementById("prod-nombre").value.trim();
+            const id_categoria = document.getElementById("prod-categoria").value;
+            const descripcion = document.getElementById("prod-descripcion").value.trim();
+            const precio = parseFloat(document.getElementById("prod-precio").value);
+            const tipo = document.getElementById("prod-tipo").value;
+            const archivoImagen = document.getElementById("prod-imagen").files[0];
+
+            if (!nombre || !precio) {
+                alert("El nombre y el precio son obligatorios.");
+                return;
+            }
+
+            try {
+                // 1. Subir imagen si se seleccionó una nueva
+                if (archivoImagen) {
+                    const formData = new FormData();
+                    formData.append("imagen", archivoImagen);
+
+                    const respImagen = await fetch(API_BASE + "subir_imagen.php", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const resultadoImagen = await respImagen.json();
+
+                    if (resultadoImagen.status === "success") {
+                        imagenRuta = resultadoImagen.ruta;
+                    } else {
+                        alert("Error al subir imagen: " + resultadoImagen.message);
+                        return;
+                    }
+                }
+
+                // 2. Preparar datos del producto
+                const datosProducto = {
+                    id_categoria: parseInt(id_categoria),
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    precio: precio,
+                    tipo: tipo,
+                    imagen: imagenRuta
+                };
+
+                // 3. Determinar si es crear o editar
+                let url, metodo;
+                if (id) {
+                    // Editar
+                    datosProducto.id_producto = parseInt(id);
+                    url = API_BASE + "productos_admin.php";
+                    metodo = "PUT";
+                } else {
+                    // Crear
+                    url = API_BASE + "productos_admin.php";
+                    metodo = "POST";
+                }
+
+                const respProducto = await fetch(url, {
+                    method: metodo,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datosProducto)
+                });
+
+                const resultado = await respProducto.json();
+
+                if (resultado.status === "success") {
+                    alert(id ? "Producto actualizado correctamente." : "Producto creado correctamente.");
+                    cerrarModalProducto();
+                    cargarProductos();
+                } else {
+                    alert("Error: " + resultado.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión: " + error.message);
+            }
+        }
+
+        // Eliminar producto
+        async function eliminarProducto(id, nombre) {
+            if (!confirm(`¿Estás seguro de eliminar "${nombre}"?`)) return;
+
+            try {
+                const resp = await fetch(API_BASE + "productos_admin.php", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_producto: id })
+                });
+
+                const resultado = await resp.json();
+
+                if (resultado.status === "success") {
+                    alert("Producto eliminado.");
+                    cargarProductos();
+                } else {
+                    alert("Error: " + resultado.message);
+                }
+            } catch (error) {
+                alert("Error de conexión: " + error.message);
+            }
+        }
+
+        // Cargar usuarios
+        async function cargarUsuarios() {
+            const usuarios = await obtenerDatos("usuarios.php");
+            const tbody = document.getElementById("tabla-usuarios");
+
+            if (usuarios && usuarios.data && usuarios.data.length > 0) {
+                tbody.innerHTML = usuarios.data.map(u => `
+                    <tr>
+                        <td>${u.id_usuario}</td>
+                        <td>${u.nombre_completo}</td>
+                        <td>${u.username}</td>
+                        <td><span class="badge badge-info">${u.rol}</span></td>
+                        <td>
+                            <button class="btn-action btn-edit">Editar</button>
+                            <button class="btn-action btn-delete">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join("");
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay usuarios</td></tr>';
+            }
+        }
+
+        // Cargar clientes
+        async function cargarClientes() {
+            const clientes = await obtenerDatos("clientes.php");
+            const tbody = document.getElementById("tabla-clientes");
+
+            if (clientes && clientes.data && clientes.data.length > 0) {
+                tbody.innerHTML = clientes.data.map(c => `
+                    <tr>
+                        <td>${c.id_cliente}</td>
+                        <td>${c.tipo_documento}: ${c.numero_documento}</td>
+                        <td>${c.nombre_razon_social}</td>
+                        <td>${c.telefono || '-'}</td>
+                        <td>
+                            <button class="btn-action btn-edit">Editar</button>
+                            <button class="btn-action btn-delete">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join("");
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay clientes</td></tr>';
+            }
+        }
+
+        // Cerrar sesión
+        function cerrarSesion() {
+            if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                localStorage.removeItem("usuario");
+                window.location.href = "index.html";
+            }
+        }
+    </script>
+</body>
+
+</html>

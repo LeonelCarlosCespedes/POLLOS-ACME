@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos - Pollos Acme</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .form-producto {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .form-producto h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .preview-imagen {
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px auto;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+
+        .preview-imagen img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-imagen span {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .btn-subir-imagen {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .btn-subir-imagen:hover {
+            background: #2980b9;
+        }
+
+        .lista-productos {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 900px;
+        }
+
+        .producto-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .producto-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .producto-item .info {
+            flex: 1;
+        }
+
+        .producto-item .info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .producto-item .info p {
+            margin: 0;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .producto-item .precio {
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 18px;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .btn-volver {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px;
+        }
+
+        .btn-volver:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="admin.html" class="btn-volver">← Volver al Admin</a>
+
+    <div class="form-producto">
+        <h2>➕ Agregar Nuevo Producto</h2>
+
+        <div class="form-group">
+            <label>Nombre del producto:</label>
+            <input type="text" id="prod-nombre" placeholder="Ej: 1/4 Pollo + Papas">
+        </div>
+
+        <div class="form-group">
+            <label>Categoría:</label>
+            <select id="prod-categoria">
+                <option value="1">Pollos a la Brasa</option>
+                <option value="2">Combos</option>
+                <option value="3">Bebidas</option>
+                <option value="4">Extras</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Descripción:</label>
+            <textarea id="prod-descripcion" rows="3" placeholder="Descripción del producto"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Precio (Bs.):</label>
+            <input type="number" id="prod-precio" step="0.01" placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+            <label>Tipo:</label>
+            <select id="prod-tipo">
+                <option value="Simple">Simple</option>
+                <option value="Combo">Combo</option>
+                <option value="Extra">Extra</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Imagen del producto:</label>
+            <input type="file" id="prod-imagen" accept="image/*" onchange="previewImagen(event)">
+            <div class="preview-imagen" id="preview-imagen">
+                <span>Sin imagen</span>
+            </div>
+        </div>
+
+        <button class="btn-save" onclick="guardarProducto()" style="width:100%;">💾 Guardar Producto</button>
+    </div>
+
+    <div class="lista-productos">
+        <h2>📋 Productos Registrados</h2>
+        <div id="lista-productos-container">
+            <p style="text-align:center; color:#888;">Cargando...</p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let imagenRuta = null;
+
+        // Vista previa de la imagen
+        function previewImagen(event) {
+            const archivo = event.target.files[0];
+            const preview = document.getElementById("preview-imagen");
+
+            if (archivo) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(archivo);
+            } else {
+                preview.innerHTML = '<span>Sin imagen</span>';
+            }
+        }
+
+        // Guardar producto
+        async function guardarProducto() {
+            const nombre = document.getElementById("prod-nombre").value.trim();
+            const id_categoria = document.getElementById("prod-categoria").value;
+            const descripcion = document.getElementById("prod-descripcion").value.trim();
+            const precio = parseFloat(document.getElementById("prod-precio").value);
+            const tipo = document.getElementById("prod-tipo").value;
+            const archivoImagen = document.getElementById("prod-imagen").files[0];
+
+            if (!nombre || !precio) {
+                alert("⚠️ El nombre y el precio son obligatorios.");
+                return;
+            }
+
+            try {
+                // 1. Subir imagen si existe
+                if (archivoImagen) {
+                    const formData = new FormData();
+                    formData.append("imagen", archivoImagen);
+
+                    const respImagen = await fetch("http://localhost/pollos_acme/api/subir_imagen.php", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const resultadoImagen = await respImagen.json();
+
+                    if (resultadoImagen.status === "success") {
+                        imagenRuta = resultadoImagen.ruta;
+                    } else {
+                        alert("⚠️ " + resultadoImagen.message);
+                        return;
+                    }
+                }
+
+                // 2. Guardar producto
+                const datosProducto = {
+                    id_categoria: parseInt(id_categoria),
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    precio: precio,
+                    tipo: tipo,
+                    imagen: imagenRuta
+                };
+
+                const respProducto = await fetch("http://localhost/pollos_acme/api/productos_admin.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datosProducto)
+                });
+
+                const resultado = await respProducto.json();
+
+                if (resultado.status === "success") {
+                    alert("✅ Producto guardado correctamente.");
+                    // Limpiar formulario
+                    document.getElementById("prod-nombre").value = "";
+                    document.getElementById("prod-descripcion").value = "";
+                    document.getElementById("prod-precio").value = "";
+                    document.getElementById("prod-imagen").value = "";
+                    document.getElementById("preview-imagen").innerHTML = '<span>Sin imagen</span>';
+                    imagenRuta = null;
+                    // Recargar lista
+                    cargarProductos();
+                } else {
+                    alert("❌ Error: " + resultado.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("⚠️ Error de conexión.");
+            }
+        }
+
+        // Cargar lista de productos
+        async function cargarProductos() {
+            const productos = await obtenerDatos("productos_admin.php");
+            const contenedor = document.getElementById("lista-productos-container");
+
+            if (productos && productos.data && productos.data.length > 0) {
+                contenedor.innerHTML = productos.data.map(p => {
+                    const imagenSrc = p.imagen
+                        ? `../${p.imagen}`
+                        : 'https://via.placeholder.com/60/d32f2f/ffffff?text=🐔';
+                    return `
+                        <div class="producto-item">
+                            <img src="${imagenSrc}" alt="${p.nombre}" onerror="this.src='https://via.placeholder.com/60/d32f2f/ffffff?text=🐔'">
+                            <div class="info">
+                                <h4>${p.nombre}</h4>
+                                <p>${p.categoria || 'Sin categoría'} - ${p.tipo}</p>
+                            </div>
+                            <div class="precio">Bs. ${parseFloat(p.precio).toFixed(2)}</div>
+                        </div>
+                    `;
+                }).join("");
+            } else {
+                contenedor.innerHTML = '<p style="text-align:center; color:#888;">No hay productos registrados.</p>';
+            }
+        }
+
+        // Cargar al iniciar
+        document.addEventListener("DOMContentLoaded", cargarProductos);
+    </script>
+</body>
+
+</html>
